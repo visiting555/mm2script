@@ -1,239 +1,239 @@
 -- YENİ NESİL HİLE MENÜSÜ [POPUP, DÜZENLİ, F4'le Aç/Kapat, UI Framework yok, tüm fonksiyonlar TAM] --
 
--- MM2 HİLESİ MENÜSÜ [Yenilendi!]
--- Gelişmiş fonksiyon/arayüz
--- Tüm fonksiyonlar DOLU, menü tasarımı yenilendi!
+-- ## MM2 HİLESİ MENÜSÜ V6 (TAM ÇALIŞAN) ##
 
--------------------------
--- NOTIFY FONKSİYONU
--------------------------
+----------------- NOTIFY ----------------
 local function notify(msg, t)
-    local notif = Instance.new("Frame", sg)
-    notif.Size = UDim2.fromOffset(340,42)
-    notif.Position = UDim2.new(0.5, -170, 0.15,0)
-    notif.BackgroundColor3 = Color3.fromRGB(30,40,58)
+    local notif = Instance.new("TextLabel", sg)
+    notif.Size = UDim2.fromOffset(340, 38)
+    notif.Position = UDim2.new(0.5, -170, 0.09, 0)
+    notif.BackgroundColor3 = Color3.fromRGB(30, 40, 58)
+    notif.BackgroundTransparency = 0.13
     notif.BorderSizePixel = 0
-    notif.BackgroundTransparency = 0.07
-    notif.ZIndex = 99
-    local txt = Instance.new("TextLabel", notif)
-    txt.Text = msg
-    txt.BackgroundTransparency = 1
-    txt.Size = UDim2.new(1,0,1,0)
-    txt.Font = Enum.Font.GothamSemibold
-    txt.TextColor3 = Color3.fromRGB(220,220,255)
-    txt.TextSize = 20
-    txt.ZIndex = 100
-    txt.TextWrapped = true
-    txt.TextStrokeTransparency = 0.71
-    wait(t or 2)
-    notif:Destroy()
+    notif.Font = Enum.Font.GothamBlack
+    notif.TextColor3 = Color3.fromRGB(214, 243, 255)
+    notif.TextStrokeTransparency = 0.76
+    notif.TextSize = 22
+    notif.Text = msg
+    notif.ZIndex = 101
+    notif.ClipsDescendants = true
+    game:GetService("Debris"):AddItem(notif, t or 2)
 end
 
-------------------------------------------
--- FONKSİYONALİTE BAŞLANGICI
-------------------------------------------
-local function getPlayers()
-    local t = {}
-    for _,plr in ipairs(Players:GetPlayers()) do
-        if plr~=LocalPlayer then table.insert(t, plr) end
+----------------- MENU SYSTEM ---------------
+local menuShown = true
+local MENU_KEY = Enum.KeyCode.F4
+local mm2gui = Instance.new("Frame")
+mm2gui.Name = "MM2MainMenu"
+mm2gui.Size = UDim2.fromOffset(544, 410)
+mm2gui.Position = UDim2.fromScale(0.5, 0.5)
+mm2gui.AnchorPoint = Vector2.new(0.5, 0.5)
+mm2gui.BackgroundColor3 = Color3.fromRGB(28, 32, 44)
+mm2gui.BorderSizePixel = 0
+mm2gui.Parent = sg
+mm2gui.Visible = true
+
+-- Make sure menu always on CoreGui
+sg.Parent = game:GetService("CoreGui")
+
+-- Drag support
+local UIS = UserInputService
+local dragging, dragInput, dragStart, startPos
+mm2gui.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = mm2gui.Position
     end
+    input.Changed:Connect(function()
+        if input.UserInputState == Enum.UserInputState.End then dragging = false end
+    end)
+end)
+mm2gui.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement then dragInput = input end
+end)
+UIS.InputChanged:Connect(function(input)
+    if dragging and input == dragInput then
+        local delta = input.Position - dragStart
+        mm2gui.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+-- Menu toggle
+UIS.InputBegan:Connect(function(input, gp)
+    if not gp and input.KeyCode == MENU_KEY then
+        menuShown = not menuShown
+        mm2gui.Visible = menuShown
+        sg.Enabled = menuShown
+    end
+end)
+-- Toggle button
+local topBar = Instance.new("Frame", mm2gui)
+topBar.Size = UDim2.new(1, 0, 0, 46)
+topBar.BackgroundColor3 = Color3.fromRGB(36, 106, 154)
+topBar.BorderSizePixel = 0
+
+local title = Instance.new("TextLabel", topBar)
+title.Text = "MM2 PRO V6 HİLE MENÜSÜ"
+title.Font = Enum.Font.GothamBlack
+title.TextSize = 23
+title.TextColor3 = Color3.fromRGB(255,255,255)
+title.Size = UDim2.new(1, -54, 1, 0)
+title.Position = UDim2.new(0, 18, 0, 0)
+title.BackgroundTransparency = 1
+title.TextXAlignment = Enum.TextXAlignment.Left
+
+local toggleBtn = Instance.new("TextButton", topBar)
+toggleBtn.Text = "F4"
+toggleBtn.Size = UDim2.new(0,43,1,0)
+toggleBtn.Position = UDim2.new(1,-43,0,0)
+toggleBtn.BackgroundColor3 = Color3.fromRGB(24,60,105)
+toggleBtn.TextSize = 17
+toggleBtn.Font = Enum.Font.GothamBlack
+toggleBtn.TextColor3 = Color3.fromRGB(215,255,255)
+toggleBtn.BorderSizePixel = 0
+toggleBtn.AutoButtonColor = true
+toggleBtn.MouseButton1Click:Connect(function()
+    menuShown = not menuShown
+    mm2gui.Visible = menuShown
+    sg.Enabled = menuShown
+end)
+
+---------------------------------------
+-- TAB BAR --
+---------------------------------------
+local tabBtns = {}
+local tabPages = {}
+local tabNames = {"ANA", "ROL", "HAREKET", "ITEM"}
+local selectedTab = 1
+
+local tabBar = Instance.new("Frame", mm2gui)
+tabBar.Size = UDim2.new(1, -32, 0, 36)
+tabBar.Position = UDim2.new(0, 16, 0, 54)
+tabBar.BackgroundColor3 = Color3.fromRGB(223,236,255)
+tabBar.BackgroundTransparency = 0.86
+tabBar.BorderSizePixel = 0
+
+for i, name in ipairs(tabNames) do
+    local tb = Instance.new("TextButton", tabBar)
+    tb.Text = name
+    tb.Size = UDim2.new(0,120, 0,36)
+    tb.Position = UDim2.new(0, (i-1)*128, 0, 0)
+    tb.Font = Enum.Font.GothamBlack
+    tb.TextSize = 17
+    tb.BorderSizePixel = 0
+    tb.BackgroundColor3 = (i == selectedTab) and Color3.fromRGB(44,170,225) or Color3.fromRGB(56,112,169)
+    tb.TextColor3 = Color3.fromRGB(242,242,255)
+    tabBtns[i] = tb
+    tb.MouseButton1Click:Connect(function()
+        selectedTab = i
+        for j, tab in ipairs(tabPages) do
+            tab.Visible = (j == selectedTab)
+            tabBtns[j].BackgroundColor3 = (j == selectedTab) and Color3.fromRGB(44,170,225) or Color3.fromRGB(56,112,169)
+        end
+    end)
+end
+for i=1,#tabNames do
+    local page = Instance.new("Frame", mm2gui)
+    page.Name = tabNames[i]
+    page.BackgroundTransparency = 1
+    page.Size = UDim2.new(1, -32, 1, -108)
+    page.Position = UDim2.new(0,16, 0,98)
+    page.Visible = (i==selectedTab)
+    tabPages[i] = page
+end
+
+-----------------------------------------
+-- UTIL: BTN CREATOR
+-----------------------------------------
+local function NewBtn(parent, txt, fn, order)
+    local btn = Instance.new("TextButton", parent)
+    btn.Size = UDim2.new(1,-28, 0,44)
+    btn.Position = UDim2.new(0,14, 0,14+(order-1)*54)
+    btn.BackgroundColor3 = Color3.fromRGB(39,129,214)
+    btn.TextColor3 = Color3.fromRGB(255,255,255)
+    btn.BorderSizePixel = 0
+    btn.Font = Enum.Font.GothamBold
+    btn.Text = txt
+    btn.TextStrokeTransparency = 0.72
+    btn.TextSize = 17
+    btn.AutoButtonColor = true
+    btn.ClipsDescendants = true
+    btn.Name = "Opt"..order
+    btn.MouseButton1Click:Connect(function() fn(btn) end)
+    return btn
+end
+
+-------------------------------------------------------
+-- MM2 CORE FUNCS --
+-------------------------------------------------------
+local function getPlayers() local t = {}
+    for _,plr in ipairs(Players:GetPlayers()) do
+        if plr ~= LocalPlayer then table.insert(t, plr) end end
     return t
 end
 
 local function getRole(plr)
+    -- Fast role detection
     local char = plr.Character
     if not char then return "Unknown" end
-    for _,tool in ipairs(plr.Backpack:GetChildren()) do
-        if tool.Name=="Knife" then return "Murder" elseif tool.Name=="Gun" then return "Sheriff" end
+    local function findKnifeOrGun(obj)
+        for _,c in ipairs(obj:GetChildren()) do
+            if c.Name=="Knife" then return "Murder"
+            elseif c.Name=="Gun" then return "Sheriff" end
+        end
     end
-    for _,itm in ipairs(char:GetChildren()) do
-        if itm.Name=="Knife" then return "Murder" elseif itm.Name=="Gun" then return "Sheriff" end
-    end
+    local a = findKnifeOrGun(plr.Backpack)
+    if a then return a end
+    local b = findKnifeOrGun(char)
+    if b then return b end
     return "Innocent"
 end
 
-local function findMurder()
-    for _,plr in ipairs(getPlayers()) do if getRole(plr)=="Murder" then return plr end end
-end
-local function findSheriff()
-    for _,plr in ipairs(getPlayers()) do if getRole(plr)=="Sheriff" then return plr end end
-end
-
+local function findMurder() for _,plr in ipairs(getPlayers()) do
+    if getRole(plr)=="Murder" then return plr end end end
+local function findSheriff() for _,plr in ipairs(getPlayers()) do
+    if getRole(plr)=="Sheriff" then return plr end end end
 local function findGunDrop()
     for _,obj in ipairs(workspace:GetChildren()) do
         if obj.Name=="GunDrop" and obj:IsA("Tool") then return obj end
     end
 end
-
 local function onKnife()
-    local bp = LocalPlayer.Backpack:FindFirstChild("Knife")
-    if bp then return bp end
-    if LocalPlayer.Character then return LocalPlayer.Character:FindFirstChild("Knife") end
+    if LocalPlayer.Backpack then
+        local k = LocalPlayer.Backpack:FindFirstChild("Knife")
+        if k then return k end
+    end
+    if LocalPlayer.Character then
+        return LocalPlayer.Character:FindFirstChild("Knife")
+    end
 end
-
 local function onGun()
-    local bp = LocalPlayer.Backpack:FindFirstChild("Gun")
-    if bp then return bp end
-    if LocalPlayer.Character then return LocalPlayer.Character:FindFirstChild("Gun") end
+    if LocalPlayer.Backpack then
+        local g = LocalPlayer.Backpack:FindFirstChild("Gun")
+        if g then return g end
+    end
+    if LocalPlayer.Character then
+        return LocalPlayer.Character:FindFirstChild("Gun")
+    end
 end
-
 local function teleportTo(cf)
     if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
         LocalPlayer.Character.HumanoidRootPart.CFrame = cf
     end
 end
 
-local lastPos = nil
+local lastPos
 
--------------------------------
--- MENÜ TASARIMI [Yeni!]
--------------------------------
-local menuWidth, menuHeight = 576, 400
-local menuShown = true
-
-if sg:FindFirstChild("MM2MAIN") then sg.MM2MAIN:Destroy() end
-
-local mm2main = Instance.new("Frame", sg)
-mm2main.Name = "MM2MAIN"
-mm2main.Size = UDim2.fromOffset(menuWidth, menuHeight)
-mm2main.Position = UDim2.fromOffset(64,92)
-mm2main.BackgroundColor3 = Color3.fromRGB(24,42,56)
-mm2main.BorderSizePixel = 0
-mm2main.Visible = true
-
-local border = Instance.new("Frame", mm2main)
-border.Size = UDim2.new(1,0,1,0)
-border.BackgroundTransparency = 1
-border.BorderSizePixel = 0
-
-local bar = Instance.new("Frame", mm2main)
-bar.Size = UDim2.new(1,0,0,48)
-bar.BackgroundColor3 = Color3.fromRGB(35,112,163)
-bar.BorderSizePixel = 0
-bar.Name = "Bar"
-
-local barT = Instance.new("TextLabel", bar)
-barT.Text = "MM2 PRO V5 HİLE MENÜSÜ"
-barT.Font = Enum.Font.GothamBlack
-barT.TextSize = 23
-barT.TextColor3 = Color3.fromRGB(255,255,255)
-barT.Size = UDim2.new(1,-60, 1, 0)
-barT.Position = UDim2.new(0,18,0,0)
-barT.BackgroundTransparency = 1
-barT.TextXAlignment = Enum.TextXAlignment.Left
-
--- Aç/Kapa Toggle
-local toggleBtn = Instance.new("TextButton", bar)
-toggleBtn.Text = "F4"
-toggleBtn.Size = UDim2.new(0,42,1,0)
-toggleBtn.Position = UDim2.new(1,-42,0,0)
-toggleBtn.BackgroundColor3 = Color3.fromRGB(20,67,89)
-toggleBtn.TextSize = 17
-toggleBtn.Font = Enum.Font.GothamBlack
-toggleBtn.TextColor3 = Color3.fromRGB(210,255,255)
-toggleBtn.BorderSizePixel = 0
-
--- Drag desteği
-local UIS = UserInputService
-local dragging, dragInput, dragStart, startPos
-bar.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = true
-        dragStart = input.Position
-        startPos = mm2main.Position
-        input.Changed:Connect(function() if input.UserInputState==Enum.UserInputState.End then dragging = false end end)
-    end
-end)
-bar.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement then dragInput=input end
-end)
-UIS.InputChanged:Connect(function(input)
-    if input == dragInput and dragging then
-        local delta = input.Position - dragStart
-        mm2main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset+delta.X, startPos.Y.Scale, startPos.Y.Offset+delta.Y)
-    end
-end)
-
-local function toggleMenu()
-    menuShown = not menuShown
-    mm2main.Visible = menuShown
-    sg.Enabled = menuShown
-end
-
-UIS.InputBegan:Connect(function(input, gp)
-    if not gp and input.KeyCode == Enum.KeyCode.F4 then toggleMenu() end
-end)
-toggleBtn.MouseButton1Click:Connect(toggleMenu)
-
--- TAB SİSTEMİ
-local tabTitles = {"ANA", "ROL", "HAREKET", "ITEM"}
-local selectedTab = 1
-local tabs = {}
-local tabBtns = {}
-
-local tabBar = Instance.new("Frame", mm2main)
-tabBar.Size = UDim2.new(1,-40, 0,36)
-tabBar.Position = UDim2.new(0,20,0,56)
-tabBar.BackgroundColor3 = Color3.fromRGB(223,236,255)
-tabBar.BackgroundTransparency = 0.89
-tabBar.BorderSizePixel = 0
-
-for i,name in ipairs(tabTitles) do
-    local tBtn = Instance.new("TextButton", tabBar)
-    tBtn.Text = name
-    tBtn.Size = UDim2.new(0,114, 1,0)
-    tBtn.Position = UDim2.new(0, (i-1)*122, 0, 0)
-    tBtn.Font = Enum.Font.GothamBlack
-    tBtn.TextSize = 17
-    tBtn.BorderSizePixel = 0
-    tBtn.BackgroundColor3 = i==selectedTab and Color3.fromRGB(44,170,225) or Color3.fromRGB(56,112,169)
-    tBtn.TextColor3 = Color3.fromRGB(242,242,255)
-    tabBtns[i]=tBtn
-    tBtn.MouseButton1Click:Connect(function()
-        selectedTab = i
-        for j,tab in ipairs(tabs) do tab.Visible = (j==selectedTab) end
-        for j,bb in ipairs(tabBtns) do
-            bb.BackgroundColor3 = j==selectedTab and Color3.fromRGB(44,170,225) or Color3.fromRGB(56,112,169)
-        end
-    end)
-end
-
-for i=1,#tabTitles do
-    local t = Instance.new("Frame", mm2main)
-    t.BackgroundTransparency = 1
-    t.BorderSizePixel = 0
-    t.Size = UDim2.new(1,0,1, -110)
-    t.Position = UDim2.new(0, 0, 0,92)
-    t.Visible = (i==selectedTab)
-    tabs[i]=t
-end
-
----------------------------------------------
--- ANA TAB [ESP, Silent/Aim, FOV, Spinbot]
----------------------------------------------
-local AT = tabs[1]
-local ay = 0
-local function NewBtn(parent, txt, fn)
-    local btn = Instance.new("TextButton", parent)
-    btn.Size = UDim2.new(0,238, 0,42)
-    btn.Position = UDim2.new(0, 36+(ay%2)*266, 0, 16+math.floor(ay/2)*54)
-    btn.BackgroundColor3 = Color3.fromRGB(40,120,220)
-    btn.TextColor3 = Color3.fromRGB(255,255,255)
-    btn.BorderSizePixel = 0
-    btn.Font = Enum.Font.GothamBold
-    btn.Text = txt
-    btn.TextStrokeTransparency = 0.74
-    btn.TextSize = 17
-    ay = ay+1
-    btn.MouseButton1Click:Connect(function() fn(btn) end)
-    return btn
-end
-
+------------------------------------------------
+-- 1. TAB: ANA [ESP, SilentAim, FOV, Spinbot]
+------------------------------------------------
+local ANATab = tabPages[1]
+local order = 1
 local espToggle = false
 local fovVal = 70
 local spinbot = false
 local silentAim = false
-local espObjs={}
+local espObjs = {}
 
 local function clearESP()
     for _,v in ipairs(espObjs) do if v and v.Parent then v:Destroy() end end
@@ -245,13 +245,13 @@ local function espLoop()
         if p.Character and p.Character:FindFirstChild("Head") then
             local bb = Instance.new("BillboardGui", sg)
             bb.Adornee = p.Character.Head
-            bb.Size = UDim2.new(0,84,0,25)
+            bb.Size = UDim2.new(0,104,0,28)
             bb.AlwaysOnTop = true
             bb.Name = "~ESP"
             local role = getRole(p)
             local clr = role=="Murder" and Color3.fromRGB(255,60,60)
-                    or (role=="Sheriff" and Color3.fromRGB(68,100,244))
-                    or Color3.fromRGB(68,255,80)
+                    or (role=="Sheriff" and Color3.fromRGB(68,120,255))
+                    or Color3.fromRGB(65,210,100)
             local lbl = Instance.new("TextLabel", bb)
             lbl.Size = UDim2.new(1,0,1,0)
             lbl.BackgroundTransparency = 1
@@ -259,77 +259,77 @@ local function espLoop()
                 role=="Murder" and " [KATİL]" or role=="Sheriff" and " [SHERIFF]" or "")
             lbl.TextColor3 = clr
             lbl.Font = Enum.Font.GothamBold
-            lbl.TextStrokeTransparency = 0.7
+            lbl.TextStrokeTransparency = 0.765
             lbl.TextSize = 16
             table.insert(espObjs, bb)
         end
     end
 end
 
-NewBtn(AT, "ESP", function(btn)
+NewBtn(ANATab, "ESP: KAPALI", function(btn)
     espToggle = not espToggle
     btn.Text = "ESP: "..(espToggle and "AÇIK" or "KAPALI")
     if not espToggle then clearESP() end
-end)
+end, order) order = order+1
 RunService.RenderStepped:Connect(function() if espToggle then pcall(espLoop) end end)
 
-NewBtn(AT, "SİLENT AIM", function(btn)
+NewBtn(ANATab, "SİLENT AIM: KAPALI", function(btn)
     silentAim = not silentAim
     btn.Text = "SİLENT AIM: "..(silentAim and "AÇIK" or "KAPALI")
-end)
+end, order) order=order+1
+
 local oldFire
 local function doSilentAim()
     if not silentAim then
-        -- reset override
         if oldFire and onGun() and onGun():FindFirstChild("GunScript_Client") and onGun().GunScript_Client:FindFirstChild("ShootGun") then
             onGun().GunScript_Client.ShootGun.FireServer = oldFire
             oldFire=nil
         end
         return
     end
-    -- override
     local murder = findMurder()
     local gun = onGun()
     if not murder or not gun or not gun:FindFirstChild("GunScript_Client") then return end
     local gs = gun.GunScript_Client
     if gs:FindFirstChild("ShootGun") and not oldFire then
-        oldFire = gs.ShootGun.FireServer
+        oldFire=gs.ShootGun.FireServer
         gs.ShootGun.FireServer = function(self,...)
-            local pos = murder.Character.Head.Position
-            return oldFire(self, pos, murder.Character.Head)
+            local pos = murder.Character and murder.Character:FindFirstChild("Head") and murder.Character.Head.Position or Vector3.zero
+            return oldFire(self, pos, murder.Character and murder.Character.Head)
         end
     end
 end
 RunService.RenderStepped:Connect(doSilentAim)
 
-NewBtn(AT, "FOV CHANGER", function(btn)
+NewBtn(ANATab, "FOV: 70", function(btn)
     fovVal = fovVal+25
-    if fovVal>120 then fovVal=70 end
-    Camera.FieldOfView=fovVal
+    if fovVal>120 then fovVal = 70 end
+    Camera.FieldOfView = fovVal
     btn.Text = "FOV: "..fovVal
     notify("FOV: "..fovVal,1)
-end)
+end, order) order=order+1
 
-NewBtn(AT, "SPINBOT", function(btn)
+NewBtn(ANATab, "SPINBOT: KAPALI", function(btn)
     spinbot = not spinbot
     btn.Text = "SPINBOT: "..(spinbot and "AÇIK" or "KAPALI")
     if not spinbot and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
         LocalPlayer.Character.HumanoidRootPart.RotVelocity = Vector3.zero
     end
-end)
+end, order) order=order+1
+
 RunService.Heartbeat:Connect(function()
     if spinbot and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        LocalPlayer.Character.HumanoidRootPart.RotVelocity = Vector3.new(0,100,0)
+        LocalPlayer.Character.HumanoidRootPart.RotVelocity = Vector3.new(0,120,0)
     end
 end)
 
---------------------------------------------
--- ROL TAB [Katil/Sheriff Ol, Katili Öldür, KillAll]
---------------------------------------------
-ay=0
-local roleTab = tabs[2]
+-------------------------------------------------
+-- 2. TAB: ROL [Katil/Sheriff Ol, Katili öldür, KillAll]
+-------------------------------------------------
+local RoleTab = tabPages[2] order=1
 local roleWish = nil
-NewBtn(roleTab, "KATİLİ ÖLDÜR (Sheriff)", function(btn)
+
+NewBtn(RoleTab, "KATİLİ ÖLDÜR (Sheriff)", function(btn)
     if getRole(LocalPlayer) ~= "Sheriff" then return notify("Sheriff değilsin!",1) end
     local murderer = findMurder()
     if not murderer or not murderer.Character or not murderer.Character:FindFirstChild("Head") then
@@ -341,16 +341,17 @@ NewBtn(roleTab, "KATİLİ ÖLDÜR (Sheriff)", function(btn)
         gun.GunScript_Client.ShootGun:FireServer(unpack(args))
         notify("Katil öldürülmeye çalışıldı!", 1.5)
     end
-end)
+end, order) order=order+1
 
-NewBtn(roleTab, "KATİL OL (Başlamadan)", function(btn)
+NewBtn(RoleTab, "KATİL OL (Başlamadan)", function(btn)
     roleWish = "Murderer"
-    notify("Başlayınca KATİL olacaksın!",1.3)
-end)
-NewBtn(roleTab, "SHERIFF OL (Başlamadan)", function(btn)
+    notify("Bir sonraki tur KATİL olacaksın!",1.2)
+end, order) order=order+1
+NewBtn(RoleTab, "SHERIFF OL (Başlamadan)", function(btn)
     roleWish = "Sheriff"
-    notify("Başlayınca SHERIFF olacaksın!",1.3)
-end)
+    notify("Bir sonraki tur SHERIFF olacaksın!",1.2)
+end, order) order=order+1
+
 local function tryForceRole()
     local mod = LocalPlayer.PlayerGui:FindFirstChild("Main") and require(LocalPlayer.PlayerGui.Main:FindFirstChild("Framework"))
     if mod and mod.SetRole then
@@ -363,17 +364,18 @@ local function tryForceRole()
     end
 end
 workspace.ChildAdded:Connect(function(child)
-    if tostring(child)=="Map" and roleWish then
+    if tostring(child) == "Map" and roleWish then
         pcall(function()
             tryForceRole()
-            notify("Rol denendi: "..roleWish,1.5)
-            roleWish=nil
+            notify("Rol denendi: "..tostring(roleWish), 1.1)
+            roleWish = nil
         end)
     end
 end)
+
 -- Kill All
 local killAllActive = false
-NewBtn(roleTab, "KİLL ALL (Katil)", function(btn)
+NewBtn(RoleTab, "KİLL ALL (Katil)", function(btn)
     if getRole(LocalPlayer)~="Murder" then return notify("Katil değilsin!", 1) end
     if killAllActive then return end; killAllActive=true
     local targets = {}
@@ -383,12 +385,12 @@ NewBtn(roleTab, "KİLL ALL (Katil)", function(btn)
         end
     end
     local myKnife = onKnife()
-    if not myKnife then notify("Knife yok!",1.3) killAllActive=false return end
+    if not myKnife then notify("Knife yok!",1.22) killAllActive=false return end
     lastPos = LocalPlayer.Character.HumanoidRootPart.CFrame
     for _,victim in ipairs(targets) do
         if killAllActive and victim.Character and victim.Character:FindFirstChild("HumanoidRootPart") then
             teleportTo(victim.Character.HumanoidRootPart.CFrame + Vector3.new(0,0,2))
-            wait(0.22)
+            wait(0.23)
             local stab = myKnife:FindFirstChild("KnifeScript_Client") or myKnife:FindFirstChildOfClass('LocalScript')
             if stab and stab:FindFirstChild("Slash") then
                 for _=1,2 do stab.Slash:FireServer() wait(0.09) end
@@ -396,21 +398,22 @@ NewBtn(roleTab, "KİLL ALL (Katil)", function(btn)
         end
     end
     teleportTo(lastPos) killAllActive=false
-    notify("KillAll tamam!",1.4)
-end)
+    notify("KillAll tamam!",1.2)
+end, order)
 
---------------------------------------------
--- HAREKET TAB [Fly, Noclip]
---------------------------------------------
-ay=0
-local hareketTab = tabs[3]
-local flyOn=false
-local velObj=nil
-NewBtn(hareketTab,"FLY",function(btn)
+---------------------------------------------------------
+-- 3. TAB: HAREKET [Fly, Noclip]
+---------------------------------------------------------
+local HareketTab = tabPages[3] order = 1
+local flyOn = false
+local velObj = nil
+
+NewBtn(HareketTab, "FLY: KAPALI", function(btn)
     flyOn = not flyOn
     btn.Text = "FLY: "..(flyOn and "AÇIK" or "KAPALI")
     if not flyOn and velObj then velObj:Destroy() velObj=nil end
-end)
+end, order) order=order+1
+
 RunService.RenderStepped:Connect(function()
     if flyOn and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
         if not velObj then
@@ -423,17 +426,17 @@ RunService.RenderStepped:Connect(function()
         if UIS:IsKeyDown(Enum.KeyCode.S) then moveVec = moveVec - Camera.CFrame.LookVector end
         if UIS:IsKeyDown(Enum.KeyCode.A) then moveVec = moveVec - Camera.CFrame.RightVector end
         if UIS:IsKeyDown(Enum.KeyCode.D) then moveVec = moveVec + Camera.CFrame.RightVector end
-        if UIS:IsKeyDown(Enum.KeyCode.Space) then moveVec= moveVec + Vector3.new(0,1,0) end
-        if UIS:IsKeyDown(Enum.KeyCode.LeftShift) then moveVec= moveVec - Vector3.new(0,1,0) end
-        velObj.Velocity = moveVec.Magnitude>0 and moveVec.Unit*57 or Vector3.zero
+        if UIS:IsKeyDown(Enum.KeyCode.Space) then moveVec = moveVec + Vector3.new(0,1,0) end
+        if UIS:IsKeyDown(Enum.KeyCode.LeftShift) then moveVec = moveVec - Vector3.new(0,1,0) end
+        velObj.Velocity = moveVec.Magnitude>0 and moveVec.Unit*58 or Vector3.zero
     elseif velObj then velObj:Destroy() velObj=nil end
 end)
 
-local noclipOn=false
-NewBtn(hareketTab,"NOCLIP",function(btn)
+local noclipOn = false
+NewBtn(HareketTab, "NOCLIP: KAPALI", function(btn)
     noclipOn = not noclipOn
     btn.Text = "NOCLIP: "..(noclipOn and "AÇIK" or "KAPALI")
-end)
+end, order)
 RunService.Stepped:Connect(function()
     if noclipOn and LocalPlayer.Character then
         for _,v in ipairs(LocalPlayer.Character:GetChildren()) do
@@ -442,29 +445,32 @@ RunService.Stepped:Connect(function()
     end
 end)
 
--------------------------------------
--- ITEM TAB [Düşen Silahı Al]
--------------------------------------
-ay=0
-local itemTab = tabs[4]
-NewBtn(itemTab, "Düşen Silahı Al", function(btn)
+-----------------------------------------------------
+-- 4. TAB: ITEM [Düşen Silahı Al]
+-----------------------------------------------------
+local ItemTab = tabPages[4] order=1
+
+NewBtn(ItemTab, "DÜŞEN SİLAHI AL", function(btn)
     local gun = findGunDrop()
-    if not gun then return notify("Yerde silah yok!",1.5) end
-    if not LocalPlayer.Character or not LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then 
-        return notify("Karakter bulunamadı!",1.5)
+    if not gun then return notify("Yerde silah yok!",1.2) end
+    if not LocalPlayer.Character or not LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        return notify("Karakter bulunamadı!", 1.2)
     end
-    lastPos=LocalPlayer.Character.HumanoidRootPart.CFrame
+    lastPos = LocalPlayer.Character.HumanoidRootPart.CFrame
     LocalPlayer.Character.HumanoidRootPart.CFrame = gun.CFrame + Vector3.new(0,2,0)
-    wait(0.23)
+    wait(0.22)
     pcall(function()
         firetouchinterest(LocalPlayer.Character.HumanoidRootPart, gun.Handle, 0)
         wait(0.07)
         firetouchinterest(LocalPlayer.Character.HumanoidRootPart, gun.Handle, 1)
     end)
     wait(0.1)
-    LocalPlayer.Character.HumanoidRootPart.CFrame = lastPos; lastPos=nil
-    notify("Silah çekildi!",1.1)
-end)
+    LocalPlayer.Character.HumanoidRootPart.CFrame = lastPos
+    lastPos = nil
+    notify("Silah çekildi!", 1.1)
+end, order)
+
+
 
 
 
